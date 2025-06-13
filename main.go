@@ -12,20 +12,21 @@ import (
 )
 
 func main() {
-	// Get port from environment or default to 8080
+	// Get port from environment (Render uses this)
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
 	}
 
-	log.Println("Starting server on port " + port)
-	log.Fatal(http.ListenAndServe(":"+port, nil))
+	// Create a new ServeMux
+	mux := http.NewServeMux()
 
-	http.HandleFunc("/shorten", shortenHandler)
-	http.HandleFunc("/", redirectHandler)
+	// Register routes with CORS
+	mux.Handle("/shorten", enableCORS(http.HandlerFunc(shortenHandler)))
+	mux.Handle("/", enableCORS(http.HandlerFunc(redirectHandler)))
 
-	fmt.Println("URL shortener running at http://localhost:8080")
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	fmt.Println("URL shortener running on port " + port)
+	log.Fatal(http.ListenAndServe(":"+port, mux))
 }
 
 var (
@@ -34,10 +35,6 @@ var (
 )
 
 func redirectHandler(w http.ResponseWriter, r *http.Request) {
-	enableCORS(w, r)
-	if r.Method == "OPTIONS" {
-		return
-	}
 	code := r.URL.Path[1:]
 
 	mutex.RLock()
@@ -63,10 +60,23 @@ type ShortenRespose struct {
 	URL string `json:"short_url"`
 }
 
-func enableCORS(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
-	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+func enableCORS(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Allow all origins (or you can restrict to your domain)
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		// Allow specific methods
+		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
+		// Allow specific headers
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+
+		// Handle preflight requests
+		if r.Method == "OPTIONS" {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
 }
 
 func generateCode(n int) string {
@@ -80,10 +90,6 @@ func generateCode(n int) string {
 }
 
 func shortenHandler(w http.ResponseWriter, r *http.Request) {
-	enableCORS(w, r)
-	if r.Method == "OPTIONS" {
-		return
-	}
 	if r.Method != http.MethodPost {
 		http.Error(w, "ONLY POST ALLOWED", http.StatusMethodNotAllowed)
 		return
