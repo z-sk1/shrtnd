@@ -6,11 +6,21 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
+	"os"
 	"sync"
 	"time"
 )
 
 func main() {
+	// Get port from environment or default to 8080
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+
+	log.Println("Starting server on port " + port)
+	log.Fatal(http.ListenAndServe(":"+port, nil))
+
 	http.HandleFunc("/shorten", shortenHandler)
 	http.HandleFunc("/", redirectHandler)
 
