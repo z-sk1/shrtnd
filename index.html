@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #537290;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 50px;
+    }
+
+    h1 {
+      color: #ffe2e2;
+      margin-bottom: 30px;
+    }
+
+    input[type="text"] {
+      width: 300px;
+      padding: 12px;
+      border: 2px solid #ccc;
+      border-radius: 8px;
+      font-size: 16px;
+      margin-bottom: 10px;
+    }
+
+    button {
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px 20px;
+      margin-left: 10px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.2s ease;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    #result {
+      margin-top: 20px;
+      font-size: 18px;
+      color: #222;
+    }
+
+    a {
+      color: #fbff00;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+  </style>
+<head>
+  <title>URL Shortener</title>
+</head>
+<body>
+  <h1>My URL Shortener</h1>
+
+  <input type="text" id="urlInput" placeholder="Enter a long URL">
+  <button onclick="shortenURL()">Shorten</button>
+
+  <p id="result"></p>
+
+  <script>
+    async function shortenURL() {
+      let longUrl = document.getElementById("urlInput").value;
+
+      const urlPattern = /^(https?:\/\/)[^\s$.?#].[^\s]*$/i;
+      
+      // Auto-fix: Add https:// if missing
+      if (!longUrl.startsWith("http://") && !longUrl.startsWith("https://")) {
+        longUrl = "https://" + longUrl;
+      }   
+
+
+      if (!urlPattern.test(longUrl)) {
+        document.getElementById("result").innerText = "❌ Please enter a valid URL that starts with http:// or https://";
+        return;
+      }
+
+      const response = await fetch("http://localhost:8080/shorten", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ url: longUrl })
+      });
+
+      if (!response.ok) {
+        document.getElementById("result").innerText = "Failed to shorten URL.";
+        return;
+      }
+    
+      const data = await response.json();
+      // Create result HTML with a copy button
+      document.getElementById("result").innerHTML = `
+        Short URL: <a id="shortLink" href="${data.short_url}" target="_blank">${data.short_url}</a>
+        <button id = "copyButton" onclick="copyURL()">Copy</button>
+      `;
+    }
+
+    function copyURL() {
+  const url = document.getElementById("shortLink").href;
+  navigator.clipboard.writeText(url)
+    .then(() => {
+      document.getElementById("copyButton").innerText = "Copied!";
+      setTimeout(() => {getElementById("copyButton").innerText = "Copy!"}, 1500)})
+    .catch(err => alert("Failed to copy 😢"));
+}
+
+  </script>
+</body>
+</html>
