@@ -105,7 +105,7 @@ func shortenHandler(w http.ResponseWriter, r *http.Request) {
 	mutex.Unlock()
 
 	resp := map[string]string{
-		"short_url": fmt.Sprintf("https://url-shortener-zm4r.onrender.com%s", code),
+		"short_url": fmt.Sprintf("https://url-shortener-zm4r.onrender.com/%s", code),
 	}
 
 	w.Header().Set("Content-Type", "application/json")
