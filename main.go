@@ -12,21 +12,20 @@ import (
 )
 
 func main() {
-	// Get port from environment (Render uses this)
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
 	}
 
-	// Create a new ServeMux
 	mux := http.NewServeMux()
+	mux.HandleFunc("/shorten", shortenHandler)
+	mux.HandleFunc("/", redirectHandler)
 
-	// Register routes with CORS
-	mux.Handle("/shorten", enableCORS(http.HandlerFunc(shortenHandler)))
-	mux.Handle("/", enableCORS(http.HandlerFunc(redirectHandler)))
+	// Wrap handlers with CORS middleware
+	handler := enableCORS(mux)
 
-	fmt.Println("URL shortener running on port " + port)
-	log.Fatal(http.ListenAndServe(":"+port, mux))
+	log.Println("Starting server on port " + port)
+	log.Fatal(http.ListenAndServe(":"+port, handler))
 }
 
 var (
@@ -62,11 +61,8 @@ type ShortenRespose struct {
 
 func enableCORS(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Allow all origins (or you can restrict to your domain)
 		w.Header().Set("Access-Control-Allow-Origin", "*")
-		// Allow specific methods
-		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
-		// Allow specific headers
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 
 		// Handle preflight requests
