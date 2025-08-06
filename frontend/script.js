@@ -1,3 +1,9 @@
+document.getElementById("urlInput").addEventListener("keydown", function (event) {
+	if (event.key === "Enter") {
+		shortenURL();
+	}
+});
+
 async function shortenURL() {
       let longUrl = document.getElementById("urlInput").value;
 
