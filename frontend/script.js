@@ -39,13 +39,13 @@ async function shortenURL() {
         Short URL: <a id="shortLink" href="${data.short_url}" target="_blank">${data.short_url}</a>
         <button id = "copyButton" onclick="copyURL()">Copy</button>
       `;
-    }
+}
 
-    function copyURL() {
+function copyURL() {
   const url = document.getElementById("shortLink").href;
   navigator.clipboard.writeText(url)
     .then(() => {
       document.getElementById("copyButton").innerText = "Copied!";
-      setTimeout(() => {getElementById("copyButton").innerText = "Copy!"}, 1500)})
+      setTimeout(() => {document.getElementById("copyButton").innerText = "Copy!"}, 1500)})
     .catch(err => alert("Failed to copy 😢"));
-}
+    }
