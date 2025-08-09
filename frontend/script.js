@@ -47,5 +47,5 @@ function copyURL() {
     .then(() => {
       document.getElementById("copyButton").innerText = "Copied!";
       setTimeout(() => {document.getElementById("copyButton").innerText = "Copy!"}, 1500)})
-    .catch(err => alert("Failed to copy 😢"));
+    .catch(err => alert("Failed to copy, Error Message: " + err));
     }
