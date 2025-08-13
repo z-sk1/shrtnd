@@ -124,8 +124,9 @@ const styles = StyleSheet.create({
   },
 
   header: {
-    fontSize: 48,
+    fontSize: 55,
     marginBottom: 40,
+    fontWeight: 'bold',
     color: 'rgba(255, 255, 255, 0.47)', // #ffffff78 alpha
     textShadowColor: 'rgba(0, 0, 0, 0.3)',
     textShadowOffset: { width: 1, height: 1 },
@@ -214,7 +215,7 @@ const styles = StyleSheet.create({
 
   buttonText: {
     color: '#fff',
-    fontSize: 16,
+    fontSize: 23,
     fontWeight: 'bold',
   },
 
