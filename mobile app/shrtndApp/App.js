@@ -1,6 +1,6 @@
 import * as Clipboard from 'expo-clipboard';
 import React, { useState } from 'react';
-import { View, StyleSheet, TouchableOpacity, Text, TextInput, Alert } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Text, TextInput, Alert, Linking } from 'react-native';
 
 export default function App() {
   const [text, setText] = useState('');
@@ -35,10 +35,23 @@ export default function App() {
         </TouchableOpacity>
       </View>
 
+
       <View style = {styles.result}>
         {displayData ? (
           <>
-            <Text style = {styles.resultText}>Short URL: {displayData.short_url}</Text>
+            <Text style = {styles.resultText}>
+              Short URL: {""}
+              <Text style = {{ color: 'yellow', textDecorationLine: 'underline' }}
+                onPress = {() => {
+                  if (displayData && displayData.short_url) {
+                    Linking.openURL(displayData.short_url).catch(err => {
+                      Alert.alert("Failed to open URL! Error:", err.message);
+                    });
+                  }
+                }}
+              >
+              {displayData.short_url}</Text>
+            </Text>
             <TouchableOpacity
               style = {[styles.copyButton, copyBtnPressed && styles.buttonPressed]}
               onPressIn = {(() => setCopyBtnPressed(true))}
